@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { Button, StyleSheet, Switch, View } from "react-native";
 
 export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -24,7 +24,8 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <CameraView enableTorch={torchEnabled} />
-      <ThemedText type="title" onPress={() => setTorchEnabled(!torchEnabled)}>
+      <Switch value={torchEnabled} onValueChange={() => setTorchEnabled(!torchEnabled)} />
+      <ThemedText className="text-2xl mt-[-6px] animate-wave" onPress={() => setTorchEnabled(!torchEnabled)}>
         {torchEnabled ? "Torch On" : "Torch Off"}
       </ThemedText>
     </ThemedView>
