@@ -24,7 +24,7 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <CameraView enableTorch={torchEnabled} />
-      <Switch value={torchEnabled} onValueChange={() => setTorchEnabled(!torchEnabled)} />
+      <Switch value={torchEnabled}  trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={torchEnabled ? '#f5dd4b' : '#f4f3f4'} onValueChange={() => setTorchEnabled(!torchEnabled)} />
       <ThemedText className="text-2xl mt-[-6px] animate-wave" onPress={() => setTorchEnabled(!torchEnabled)}>
         {torchEnabled ? "Torch On" : "Torch Off"}
       </ThemedText>
