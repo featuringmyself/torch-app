@@ -71,9 +71,9 @@ export default function HomeScreen() {
               ? require("@/assets/lightBulbOn.png")
               : require("@/assets/lightBulbOff.png")
           }
-          className="w-10 h-10"
+          className="w-32 h-32"
           contentFit="contain"
-          style={{ width: 100, height: 100 }}
+          style={{ width: 320, height: 320 }}
         />
       </Pressable>
     </View>
