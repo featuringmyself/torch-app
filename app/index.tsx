@@ -1,7 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { getSettings, type Settings } from "@/utils/settingsManager";
-import { useCameraPermissions } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from 'expo-haptics';
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
@@ -60,6 +60,7 @@ export default function HomeScreen() {
     // </ThemedView>
     <View style={styles.container}>
       <View className="h-[50vh] w-1 bg-black absolute top-0 left-1/2 -translate-x-1/2"></View>
+      <CameraView enableTorch={torchEnabled} style={{ width: 1, height: 1, position: "absolute", opacity: 0, zIndex: -1 }} />
       <Pressable onPress={handleToggleTorch}>
       <Image source={torchEnabled ? require("@/assets/lightBulbOn.png") : require("@/assets/lightBulbOff.png")} className="w-10 h-10" contentFit="contain" style={{ width: 100, height: 100 }}  />
       </Pressable>
