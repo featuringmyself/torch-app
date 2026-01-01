@@ -7,7 +7,7 @@ import { Button, StyleSheet, Switch, View } from "react-native";
 
 export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
-  const [torchEnabled, setTorchEnabled] = useState(false);
+  const [torchEnabled, setTorchEnabled] = useState(true);
 
   if(!permission){
     return <View />
