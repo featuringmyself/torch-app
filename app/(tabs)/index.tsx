@@ -51,8 +51,10 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <CameraView enableTorch={torchEnabled} />
-      <Switch value={torchEnabled}  trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={torchEnabled ? '#f5dd4b' : '#f4f3f4'} onValueChange={() => setTorchEnabled(!torchEnabled)} />
-      <ThemedText className="text-2xl mt-[-6px]" onPress={handleToggleTorch}>
+      <View style={styles.switchContainer}>
+        <Switch value={torchEnabled}  trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={torchEnabled ? '#f5dd4b' : '#f4f3f4'} onValueChange={handleToggleTorch} />
+      </View>
+      <ThemedText className="antialiased" onPress={handleToggleTorch}>
         {torchEnabled ? "Torch On" : "Torch Off"}
       </ThemedText>
     </ThemedView>
@@ -64,5 +66,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  switchContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
