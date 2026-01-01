@@ -1,12 +1,10 @@
-import { StyleSheet, Switch } from 'react-native';
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
 import { getSettings, saveSettings, type Settings } from '@/utils/settingsManager';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -25,49 +23,77 @@ export default function SettingsScreen() {
     const updatedSettings = { ...settings, [key]: value } as Settings;
     await saveSettings(updatedSettings);
     setSettings(updatedSettings);
+    
+    if (settings?.hapticsEnabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   }
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
+    <View style={styles.container} className="bg-[#1E1E1E]">
+      <Link href="/" asChild className="absolute top-16 left-8 bg-[#332D2B] rounded-2xl p-3">
+        <Pressable>
+          <Ionicons name="arrow-back" size={28} color="white" />
+        </Pressable>
+      </Link>
+
+      <View style={styles.content}>
+        <Text className="text-white text-4xl mb-12 font-medium">
           Settings
-        </ThemedText>
-      </ThemedView>
-      <ThemedView className='flex flex-row flex-1 justify-between items-center'>
-        <ThemedText>Torch enabled</ThemedText>
-        <Switch value={settings?.torchEnabled}  trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={settings?.torchEnabled ? '#f5dd4b' : '#f4f3f4'} onValueChange={() => settingsHandler('torchEnabled', !settings?.torchEnabled)} />
-      </ThemedView>
-      <ThemedView className='flex flex-row flex-1 justify-between items-center'>
-        <ThemedText>Haptics enabled</ThemedText>
-        <Switch value={settings?.hapticsEnabled}  trackColor={{false: '#767577', true: '#81b0ff'}} thumbColor={settings?.hapticsEnabled ? '#f5dd4b' : '#f4f3f4'} onValueChange={() => settingsHandler('hapticsEnabled', !settings?.hapticsEnabled)} />
-      </ThemedView>
-    </ParallaxScrollView>
+        </Text>
+
+        <View className="w-full max-w-md gap-4">
+          <View className="bg-[#332D2B] rounded-2xl p-6">
+            <View className="flex flex-row justify-between items-center">
+              <View className="flex-1 mr-4">
+                <Text className="text-white text-lg font-semibold mb-1">
+                  Torch Enabled
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  Control the default flashlight state
+                </Text>
+              </View>
+              <Switch 
+                value={settings?.torchEnabled ?? true}  
+                trackColor={{false: '#767577', true: '#4A9EFF'}} 
+                thumbColor={settings?.torchEnabled ? '#FFD700' : '#f4f3f4'} 
+                onValueChange={() => settingsHandler('torchEnabled', !settings?.torchEnabled)} 
+              />
+            </View>
+          </View>
+
+          <View className="bg-[#332D2B] rounded-2xl p-6">
+            <View className="flex flex-row justify-between items-center">
+              <View className="flex-1 mr-4">
+                <Text className="text-white text-lg font-semibold mb-1">
+                  Haptics Enabled
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  Enable vibration feedback
+                </Text>
+              </View>
+              <Switch 
+                value={settings?.hapticsEnabled ?? false}  
+                trackColor={{false: '#767577', true: '#4A9EFF'}} 
+                thumbColor={settings?.hapticsEnabled ? '#FFD700' : '#f4f3f4'} 
+                onValueChange={() => settingsHandler('hapticsEnabled', !settings?.hapticsEnabled)} 
+              />
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
 });
