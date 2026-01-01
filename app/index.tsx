@@ -33,7 +33,7 @@ export default function HomeScreen() {
     setTorchEnabled(!torchEnabled);
 
     if (settings?.hapticsEnabled) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
     }
   };
   if (!permission) {
