@@ -57,7 +57,7 @@ export default function SettingsScreen() {
                 value={settings?.torchEnabled ?? true}  
                 trackColor={{false: '#767577', true: '#4A9EFF'}} 
                 thumbColor={settings?.torchEnabled ? '#FFD700' : '#f4f3f4'} 
-                onValueChange={() => settingsHandler('torchEnabled', !settings?.torchEnabled)} 
+                onValueChange={() => {settingsHandler('torchEnabled', !settings?.torchEnabled); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);}} 
               />
             </View>
           </View>
@@ -76,7 +76,7 @@ export default function SettingsScreen() {
                 value={settings?.hapticsEnabled ?? false}  
                 trackColor={{false: '#767577', true: '#4A9EFF'}} 
                 thumbColor={settings?.hapticsEnabled ? '#FFD700' : '#f4f3f4'} 
-                onValueChange={() => settingsHandler('hapticsEnabled', !settings?.hapticsEnabled)} 
+                onValueChange={() => {settingsHandler('hapticsEnabled', !settings?.hapticsEnabled); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);}} 
               />
             </View>
           </View>
