@@ -3,8 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SETTINGS_KEY = "@torch_app_settings";
 
 
-const DEFAULT_SETTINGS = {
+export type Settings = {
+    torchEnabled: boolean;
+    hapticsEnabled?: boolean;
+}
+
+const DEFAULT_SETTINGS: Settings = {
     torchEnabled: true,
+    hapticsEnabled: true,
 }
 
 export const getSettings = async () => {
@@ -17,10 +23,10 @@ export const getSettings = async () => {
     }
 }
 
-export const updateSettings = async(key: keyof typeof DEFAULT_SETTINGS, value: typeof DEFAULT_SETTINGS[keyof typeof DEFAULT_SETTINGS]) => {
+export const updateSettings = async(key: keyof Settings, value: Settings[keyof Settings]) => {
     try {
         const currentSettings = await getSettings();
-        const updatedSettings: typeof DEFAULT_SETTINGS = { ...currentSettings, [key]: value };
+        const updatedSettings: Settings = { ...currentSettings, [key]: value };
             await saveSettings(updatedSettings);
             return updatedSettings;
     } catch (error) {
@@ -29,7 +35,7 @@ export const updateSettings = async(key: keyof typeof DEFAULT_SETTINGS, value: t
     }
 }
 
-export const saveSettings = async(settings: typeof DEFAULT_SETTINGS) => {
+export const saveSettings = async(settings: Settings) => {
     try {
         await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
         return true;
