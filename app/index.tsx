@@ -1,88 +1,95 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { getSettings, type Settings } from "@/utils/settingsManager";
-import { Ionicons } from "@expo/vector-icons";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
-import { Link } from "expo-router";
-import { useEffect, useState } from "react";
-import { Button, Pressable, StyleSheet, View } from "react-native";
+import { PermissionRequest } from '@/components/permission-request';
+import { SettingsButton } from '@/components/settings-button';
+import { APP_COLORS, CAMERA_CONFIG, LIGHTBULB_SIZE } from '@/constants/app';
+import { useSettings } from '@/hooks/use-settings';
+import { useShake } from '@/hooks/use-shake';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
+  const { settings, isLoading: settingsLoading, updateSetting } = useSettings();
   const [torchEnabled, setTorchEnabled] = useState(true);
-  const [settings, setSettings] = useState<Settings | null>(null);
 
-  const loadSettings = async () => {
-    const savedSettings = await getSettings();
-    setSettings(savedSettings);
-
-    if (savedSettings.torchEnabled !== undefined) {
-      setTorchEnabled(savedSettings.torchEnabled);
-    } else {
-      setTorchEnabled(true);
-    }
-  };
-
+  // Initialize torch state from settings
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (settings && !settingsLoading) {
+      setTorchEnabled(settings.torchEnabled);
+    }
+  }, [settings, settingsLoading]);
 
-  const handleToggleTorch = async () => {
-    setTorchEnabled(!torchEnabled);
+  const handleToggleTorch = useCallback(async () => {
+    const newTorchState = !torchEnabled;
+    setTorchEnabled(newTorchState);
 
+    // Save to settings
+    try {
+      await updateSetting('torchEnabled', newTorchState);
+    } catch (error) {
+      console.error('Failed to save torch state:', error);
+      // Revert state on error
+      setTorchEnabled(torchEnabled);
+    }
+
+    // Haptic feedback
     if (settings?.hapticsEnabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
     }
-  };
+  }, [torchEnabled, settings, updateSetting]);
+
+  // Use shake detection to toggle torch (only if enabled in settings)
+  useShake(handleToggleTorch, {
+    enabled: settings?.shakeEnabled ?? true,
+  });
+
   if (!permission) {
-    return <View />;
+    return <View style={styles.container} />;
   }
 
   if (!permission.granted) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">
-          Torch needs camera permission to work
-        </ThemedText>
-        <Button onPress={requestPermission} title="grant permission" />
-      </ThemedView>
+      <PermissionRequest
+        message="Torch needs camera permission to work"
+        onRequestPermission={requestPermission}
+      />
     );
   }
 
-  return (
-    <View
-      style={styles.container}
-      className={`${torchEnabled ? "bg-[#1F1A18]" : "bg-[#1E1E1E]"}`}
-    >
+  const backgroundColor = torchEnabled
+    ? APP_COLORS.background.torchOn
+    : APP_COLORS.background.torchOff;
 
-      <Link href="/settings" asChild className="absolute top-16 left-8 bg-[#332D2B] rounded-2xl p-3">
-        <Pressable>
-          <Ionicons name="settings" size={28} color="white" />
-        </Pressable>
-      </Link>
-      <View className="h-[50vh] w-1 bg-black absolute top-0 left-1/2 -translate-x-1/2"></View>
+  return (
+    <View style={[styles.container, { backgroundColor }]}>
+      <SettingsButton href="/settings" iconName="settings" />
+      <View className="h-[50vh] w-1 bg-black absolute top-0 left-1/2 -translate-x-1/2" />
       <CameraView
         enableTorch={torchEnabled}
-        style={{
-          width: 1,
-          height: 1,
-          position: "absolute",
-          opacity: 0,
-          zIndex: -1,
-        }}
+        style={[
+          styles.hiddenCamera,
+          {
+            width: CAMERA_CONFIG.hiddenCamera.width,
+            height: CAMERA_CONFIG.hiddenCamera.height,
+            opacity: CAMERA_CONFIG.hiddenCamera.opacity,
+          },
+        ]}
       />
-      <Pressable onPress={handleToggleTorch}>
+      <Pressable onPress={handleToggleTorch} disabled={settingsLoading}>
         <Image
           source={
             torchEnabled
-              ? require("@/assets/lightBulbOn.png")
-              : require("@/assets/lightBulbOff.png")
+              ? require('@/assets/lightBulbOn.png')
+              : require('@/assets/lightBulbOff.png')
           }
           className="w-32 h-32"
           contentFit="contain"
-          style={{ width: 320, height: 320 }}
+          style={{
+            width: LIGHTBULB_SIZE.width,
+            height: LIGHTBULB_SIZE.height,
+          }}
         />
       </Pressable>
     </View>
@@ -92,11 +99,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  switchContainer: {
-    alignItems: "center",
-    justifyContent: "center",
+  hiddenCamera: {
+    position: 'absolute',
+    zIndex: -1,
   },
 });

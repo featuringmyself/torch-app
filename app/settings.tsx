@@ -1,85 +1,114 @@
-
-import { getSettings, saveSettings, type Settings } from '@/utils/settingsManager';
-import { Ionicons } from '@expo/vector-icons';
+import { SettingItem } from '@/components/setting-item';
+import { SettingsButton } from '@/components/settings-button';
+import { APP_COLORS } from '@/constants/app';
+import { useSettings } from '@/hooks/use-settings';
+import { type Settings } from '@/utils/settingsManager';
 import * as Haptics from 'expo-haptics';
-import { Link } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 export default function SettingsScreen() {
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const { settings, isLoading, updateSetting } = useSettings();
 
-  const loadSettings = async() => {
-    const savedSettings = await getSettings();
-    setSettings(savedSettings);
+  const handleSettingChange = useCallback(
+    async (key: keyof Settings, value: boolean) => {
+      if (!settings) return;
+
+      try {
+        await updateSetting(key, value);
+
+        // Provide haptic feedback
+        // For hapticsEnabled toggle, use the new value; for others, use current haptics setting
+        const shouldProvideHaptic =
+          key === 'hapticsEnabled' ? value : settings.hapticsEnabled;
+
+        if (shouldProvideHaptic) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      } catch (error) {
+        console.error('Failed to save setting:', error);
+      }
+    },
+    [settings, updateSetting]
+  );
+
+  const handleTorchToggle = useCallback(
+    (value: boolean) => {
+      handleSettingChange('torchEnabled', value);
+    },
+    [handleSettingChange]
+  );
+
+  const handleHapticsToggle = useCallback(
+    (value: boolean) => {
+      handleSettingChange('hapticsEnabled', value);
+    },
+    [handleSettingChange]
+  );
+
+  const handleShakeToggle = useCallback(
+    (value: boolean) => {
+      handleSettingChange('shakeEnabled', value);
+    },
+    [handleSettingChange]
+  );
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: APP_COLORS.background.torchOff }]}>
+        <SettingsButton href="/" iconName="arrow-back" />
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color={APP_COLORS.text.primary} />
+        </View>
+      </View>
+    );
   }
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const settingsHandler = async (key: keyof Settings, value: Settings[keyof Settings]) => {
-    if (!settings) return;
-    const updatedSettings = { ...settings, [key]: value } as Settings;
-    await saveSettings(updatedSettings);
-    setSettings(updatedSettings);
-    
-    if (settings?.hapticsEnabled) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+  if (!settings) {
+    return (
+      <View style={[styles.container, { backgroundColor: APP_COLORS.background.torchOff }]}>
+        <SettingsButton href="/" iconName="arrow-back" />
+        <View style={styles.content}>
+          <Text className="text-white text-lg">Failed to load settings</Text>
+        </View>
+      </View>
+    );
   }
 
   return (
-    <View style={styles.container} className="bg-[#1E1E1E]">
-      <Link href="/" asChild className="absolute top-16 left-8 bg-[#332D2B] rounded-2xl p-3">
-        <Pressable>
-          <Ionicons name="arrow-back" size={28} color="white" />
-        </Pressable>
-      </Link>
+    <View style={[styles.container, { backgroundColor: APP_COLORS.background.torchOff }]}>
+      <SettingsButton href="/" iconName="arrow-back" />
 
       <View style={styles.content}>
-        <Text className="text-white text-4xl mb-12 font-medium">
-          Settings
-        </Text>
+        <Text className="text-white text-4xl mb-12 font-medium">Settings</Text>
 
         <View className="w-full max-w-md gap-4">
-          <View className="bg-[#332D2B] rounded-2xl p-6">
-            <View className="flex flex-row justify-between items-center">
-              <View className="flex-1 mr-4">
-                <Text className="text-white text-lg font-semibold mb-1">
-                  Torch Enabled
-                </Text>
-                <Text className="text-gray-400 text-sm">
-                  Control the default flashlight state
-                </Text>
-              </View>
-              <Switch 
-                value={settings?.torchEnabled ?? true}  
-                trackColor={{false: '#767577', true: '#4A9EFF'}} 
-                thumbColor={settings?.torchEnabled ? '#FFD700' : '#f4f3f4'} 
-                onValueChange={() => {settingsHandler('torchEnabled', !settings?.torchEnabled); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);}} 
-              />
-            </View>
-          </View>
+          <SettingItem
+            title="Torch Enabled"
+            description="Control the default flashlight state"
+            value={settings.torchEnabled}
+            onValueChange={handleTorchToggle}
+            trackColor={APP_COLORS.switch.trackColor}
+            thumbColor={APP_COLORS.switch.thumbColor}
+          />
 
-          <View className="bg-[#332D2B] rounded-2xl p-6">
-            <View className="flex flex-row justify-between items-center">
-              <View className="flex-1 mr-4">
-                <Text className="text-white text-lg font-semibold mb-1">
-                  Haptics Enabled
-                </Text>
-                <Text className="text-gray-400 text-sm">
-                  Enable vibration feedback
-                </Text>
-              </View>
-              <Switch 
-                value={settings?.hapticsEnabled ?? false}  
-                trackColor={{false: '#767577', true: '#4A9EFF'}} 
-                thumbColor={settings?.hapticsEnabled ? '#FFD700' : '#f4f3f4'} 
-                onValueChange={() => {settingsHandler('hapticsEnabled', !settings?.hapticsEnabled); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);}} 
-              />
-            </View>
-          </View>
+          <SettingItem
+            title="Haptics Enabled"
+            description="Enable vibration feedback"
+            value={settings.hapticsEnabled}
+            onValueChange={handleHapticsToggle}
+            trackColor={APP_COLORS.switch.trackColor}
+            thumbColor={APP_COLORS.switch.thumbColor}
+          />
+
+          <SettingItem
+            title="Shake to Toggle"
+            description="Enable shake gesture to toggle torch"
+            value={settings.shakeEnabled}
+            onValueChange={handleShakeToggle}
+            trackColor={APP_COLORS.switch.trackColor}
+            thumbColor={APP_COLORS.switch.thumbColor}
+          />
         </View>
       </View>
     </View>
