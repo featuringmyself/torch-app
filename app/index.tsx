@@ -7,7 +7,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -40,6 +40,20 @@ export default function HomeScreen() {
     }
   }, [torchEnabled, settings, updateSetting]);
 
+  const handleToggleShake = useCallback(
+    async (value: boolean) => {
+      try {
+        await updateSetting('shakeEnabled', value);
+        if (settings?.hapticsEnabled) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      } catch (error) {
+        console.error('Failed to save shake setting:', error);
+      }
+    },
+    [settings, updateSetting]
+  );
+
   // Use shake detection to toggle torch (only if enabled in settings)
   useShake(handleToggleTorch, {
     enabled: settings?.shakeEnabled ?? true,
@@ -61,6 +75,8 @@ export default function HomeScreen() {
   const backgroundColor = torchEnabled
     ? APP_COLORS.background.torchOn
     : APP_COLORS.background.torchOff;
+
+  const shakeEnabled = settings?.shakeEnabled ?? true;
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
@@ -92,6 +108,40 @@ export default function HomeScreen() {
           }}
         />
       </Pressable>
+      <View style={styles.shakeToggleContainer}>
+        <Pressable
+          onPress={() => handleToggleShake(!shakeEnabled)}
+          disabled={settingsLoading}
+          style={[
+            styles.shakeToggle,
+            shakeEnabled ? styles.shakeToggleOn : styles.shakeToggleOff,
+          ]}
+        >
+          <Text
+            style={[
+              styles.shakeLabel,
+              shakeEnabled ? styles.shakeLabelOn : styles.shakeLabelOff,
+            ]}
+          >
+            Shake
+          </Text>
+          <View
+            style={[
+              styles.shakeThumb,
+              shakeEnabled ? styles.shakeThumbOn : styles.shakeThumbOff,
+            ]}
+          >
+            <Text
+              style={[
+                styles.shakeStateText,
+                shakeEnabled ? styles.shakeStateTextOn : styles.shakeStateTextOff,
+              ]}
+            >
+              {shakeEnabled ? 'On' : 'Off'}
+            </Text>
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -105,5 +155,68 @@ const styles = StyleSheet.create({
   hiddenCamera: {
     position: 'absolute',
     zIndex: -1,
+  },
+  shakeToggleContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  shakeToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: '#FF9736',
+    width: 170,
+    height: 50,
+  },
+  shakeToggleOn: {
+    backgroundColor: '#FF9500',
+  },
+  shakeToggleOff: {
+    backgroundColor: '#000000',
+  },
+  shakeLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 16,
+    flex: 1,
+  },
+  shakeLabelOn: {
+    color: '#000000',
+  },
+  shakeLabelOff: {
+    color: '#FFFFFF',
+  },
+  shakeThumb: {
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    minWidth: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
+  shakeThumbOn: {
+    backgroundColor: '#FFCB9B',
+  },
+  shakeThumbOff: {
+    backgroundColor: '#FFFFFF',
+  },
+  shakeStateText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  shakeStateTextOn: {
+    color: '#000000',
+  },
+  shakeStateTextOff: {
+    color: '#000000',
   },
 });
