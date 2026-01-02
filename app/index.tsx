@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF9500',
   },
   shakeToggleOff: {
-    backgroundColor: '#000000',
+    backgroundColor: 'transparent',
   },
   shakeLabel: {
     fontSize: 16,
