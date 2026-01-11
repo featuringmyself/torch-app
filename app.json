@@ -23,7 +23,9 @@
       "permissions": [
         "android.permission.CAMERA"
       ],
-      "package": "com.rudra.torch"
+      "package": "com.rudra.torch",
+      "enableProguardInReleaseBuilds": true,
+      "enableShrinkResourcesInReleaseBuilds": true
     },
     "web": {
       "output": "static",
