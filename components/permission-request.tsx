@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
 interface PermissionRequestProps {
   message: string;
@@ -18,11 +18,12 @@ export function PermissionRequest({
 }: PermissionRequestProps) {
   return (
     <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ThemedText type="title" className="flex-row items-center justify-center text-center">
+      <ThemedText type="title" className="flex-row items-center justify-center text-center mb-10">
         {message}
       </ThemedText>
-      <Button onPress={onRequestPermission} title={buttonTitle} />
+      <Pressable onPress={onRequestPermission} className="bg-blue-500 py-3 px-6 rounded-md">
+        <Text className="text-white font-semibold text-xl">{buttonTitle}</Text>
+      </Pressable>
     </ThemedView>
   );
 }
-

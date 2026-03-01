@@ -1,4 +1,4 @@
-# Torch 🔦
+# Torchable 🔦
 
 Just a simple flashlight app. Nothing fancy, just turn your phone's flash on/off. That's it.
 
@@ -42,7 +42,7 @@ Then press `i` for iOS, `a` for Android, or scan the QR code with Expo Go.
 ## Project Structure
 
 ```
-torch/
+torchable/
 ├── app/              # The screens
 ├── components/       # Reusable stuff
 ├── assets/           # Images and icons
